@@ -1,4 +1,6 @@
 anyio==3.6.2
+asyncpg==0.27.0
+celery==5.2.7
 fastapi==0.93.0
 idna==3.4
 pydantic==1.10.6
