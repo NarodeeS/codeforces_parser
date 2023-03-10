@@ -1,47 +1,49 @@
-from sqlalchemy import Column, Integer, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import declarative_base, relationship
 
 
 DeclarativeBase = declarative_base()
 
 
+task_theme = Table(
+    "task_themes",
+    DeclarativeBase.metadata,
+    Column("task_id", ForeignKey("tasks.id"), primary_key=True),
+    Column("theme_id", ForeignKey("themes.id"), primary_key=True),
+)
+
+
 class Task(DeclarativeBase):
     __tablename__ = 'tasks'
     
-    id = Column(Integer, primary_key=True, unique=True, nullable=False)
-    number = Column(Text(10), unique=True, nullable=False)
-    title = Column(Text(255), unique=True, nullable=False)
+    id = Column(Integer, autoincrement=True, primary_key=True, nullable=False)
+    number = Column(String(10), unique=True, nullable=False)
+    title = Column(String(255), nullable=False)
     difficulty = Column(Integer, nullable=False)
     solved_count = Column(Integer, nullable=False)
     
-    task_id = Column(Integer, ForeignKey('task_types.id'), nullable=False)
-    task_type = relationship('TaskType', back_populates='tasks')
+    themes = relationship('Theme', secondary=task_theme, back_populates='tasks')
     
-    theme_id = Column(Integer, ForeignKey('themes.id'), nullable=False)
-    theme = relationship('Theme', back_populates='tasks')
+    contest_id = Column(Integer, ForeignKey('contests.id'), nullable=True)
+    contest = relationship('Contest', back_populates='tasks')
 
 
 class Theme(DeclarativeBase):
     __tablename__ = 'themes'
     
-    id = Column(Integer, primary_key=True, unique=True, nullable=False)
-    description = Column(Text, unique=True, nullable=False)
+    id = Column(Integer, autoincrement=True, primary_key=True, nullable=False)
+    description = Column(String, unique=True, nullable=False)
     
-    tasks = relationship('Task', back_populates='theme')
+    tasks = relationship('Task', secondary=task_theme, back_populates='themes')
     contests = relationship('Contest', back_populates='theme')
-    
-
-class TaskType(DeclarativeBase):
-    __tablename__ = 'task_types'
-    id = Column(Integer, primary_key=True, unique=True, nullable=False)
-    description = Column(Text, unique=True, nullable=False)
-    tasks = relationship('Task', back_populates='task_type')
 
 
 class Contest(DeclarativeBase):
     __tablename__ = 'contests'
-    id = Column(Integer, primary_key=True, unique=True, nullable=False)
+    id = Column(Integer, autoincrement=True, primary_key=True, nullable=False)
     difficulty = Column(Integer, nullable=False)
     
     theme_id = Column(Integer, ForeignKey('themes.id'), nullable=False)
     theme = relationship('Theme', back_populates='contests')
+    
+    tasks = relationship('Task', back_populates='contest')

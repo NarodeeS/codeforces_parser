@@ -22,7 +22,7 @@ services:
       - ./app/.env
     volumes:
       - ./app/logs:/app/logs
-    command: celery -A celery_worker beat --loglevel=info
+    command: celery -A celery_worker worker -B --loglevel=info -f logs/celery.log
 
   api:
     container_name: api
@@ -43,6 +43,10 @@ services:
     container_name: postgres
     image: postgres
     restart: unless-stopped
+    expose:
+      - 5432
+    ports:
+      - 5432:5432
     env_file:
       - ./postgres/.env
     volumes:
