@@ -1,16 +1,14 @@
 from typing import TypeAlias
-from concurrent.futures import ThreadPoolExecutor
 
 import httpx
 from bs4 import BeautifulSoup
 
-from .schemas import TaskBaseSchema
-from db.models import Task, Theme
+from api.schemas import TaskBaseSchema
+from db.models import Task, Theme, DifficultyClassifier
 from db.base import Session
 
 
 URL_TEMPLATE = 'https://codeforces.com/problemset/page/{}?order=BY_SOLVED_DESC'
-
 
 ParseResult: TypeAlias = tuple[list[TaskBaseSchema], 
                                dict[TaskBaseSchema, list[str]]]
@@ -18,7 +16,16 @@ ParseResult: TypeAlias = tuple[list[TaskBaseSchema],
 TaskData: TypeAlias = tuple[TaskBaseSchema, list[str]]
 
 
-def _try_create_themes(themes: list[str]):
+def _try_create_difficulty_classifier(value: int) -> None:
+    with Session() as db_session:
+        if not bool(db_session.query(DifficultyClassifier)
+                              .filter_by(value=value)
+                              .first()):
+            db_session.add(DifficultyClassifier(value=value))
+            db_session.commit()
+
+
+def _try_create_themes(themes: list[str]) -> None:
     with Session() as db_session:
         theme_exists = [bool(db_session.query(Theme)
                                        .filter_by(description=theme)
@@ -40,7 +47,17 @@ def _process_task(task_data: TaskData) -> None:
     with Session() as db_session:    
         task_themes = (db_session.query(Theme)
                                  .filter(Theme.description.in_(themes)))
-        task = Task(**new_task.dict(), themes=list(task_themes))
+        
+        _try_create_difficulty_classifier(new_task.difficulty)
+        task_difficulty = (db_session.query(DifficultyClassifier)
+                                     .filter_by(value=new_task.difficulty)
+                                     .first())
+        
+        del new_task.difficulty
+        
+        task = Task(**new_task.dict(), 
+                    difficulty=task_difficulty, 
+                    themes=list(task_themes))
         
         if not bool(db_session.query(Task).filter_by(number=task.number).first()):
             db_session.add(task)
@@ -86,7 +103,7 @@ def parse_tasks() -> None:
     last_page = int(page_indexes_elements[-1].get('pageindex'))
     
     urls = []
-    for page_number in range(1, last_page+1):
+    for page_number in range(1, 4):
         urls.append(URL_TEMPLATE.format(page_number))
     
     results = map(_parse_page, urls)
