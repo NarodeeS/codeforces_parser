@@ -98,10 +98,10 @@ async def get_contest_tasks(query: types.CallbackQuery,
         await state.update_data(tasks=contest.tasks)
         
         await bot.send_message(query.from_user.id, 
-                            'Выберите задание для просмотра подробностей',
-                            reply_markup=get_all_items_keyboard(task_data, 
-                                                                contest.tasks,
-                                                                current_page=1))
+                               'Выберите задание для просмотра подробностей',
+                               reply_markup=get_all_items_keyboard(task_data, 
+                                                                   contest.tasks,
+                                                                   current_page=1))
         await query.message.delete()
         return
     
@@ -123,6 +123,7 @@ async def get_task_data(query: types.CallbackQuery,
         task = await get_task(task_id)
         await bot.send_message(query.from_user.id,
                                prepare_task_message(task))
+        await state.finish()
         return
 
     page_number = int(str_page_number)
