@@ -10,6 +10,6 @@ if __name__ == '__main__':
     wait_unlesss_db_started()
     DeclarativeBase.metadata.create_all(bind=engine)
     
-    uvicorn.run(app=api,  # change to 'app:api' in prod
+    uvicorn.run(app=api,  # change to 'app:api' in prod and add more workers
                 host='0.0.0.0', 
                 port=8000) 

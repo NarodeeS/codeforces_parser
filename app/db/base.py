@@ -12,4 +12,4 @@ DB_PORT = os.getenv('DB_PORT')
 CONNECTTION_STRING = f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 
 engine = create_engine(CONNECTTION_STRING)
-Session = sessionmaker(engine, expire_on_commit=False)
+Session = sessionmaker(autocommit=False, autoflush=False, expire_on_commit=False, bind=engine)
