@@ -19,6 +19,10 @@ async def show_start_message(message: types.Message):
 async def start_contest_settings(message: types.Message, state: FSMContext):
     themes = await get_themes()
     
+    if len(themes) == 0:
+        await message.answer('Темы не найдены')
+        return
+    
     await state.update_data(themes=themes)
     await state.update_data(current_page=1)
     

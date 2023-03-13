@@ -24,6 +24,13 @@ async def accept_contest_theme(query: types.CallbackQuery,
         await state.update_data(theme=theme)
         
         difficulties = await get_difficulties()
+        
+        if len(difficulties) == 0:
+            await bot.send_message(query.from_user.id,
+                                   'Возможные варианты сложности не найдены')
+            await state.finish()
+            return
+        
         await state.update_data(difficulties=difficulties)
         await bot.send_message(query.from_user.id, 
                             'Теперь введите уровень сложности заданий',

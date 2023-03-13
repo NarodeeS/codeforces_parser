@@ -30,8 +30,6 @@ services:
     build: ./app
     expose:
       - 8000
-    ports:
-      - 8000:8000
     env_file:
       - ./app/.env
     depends_on:
@@ -45,8 +43,6 @@ services:
     restart: unless-stopped
     expose:
       - 5432
-    ports:
-      - 5432:5432
     env_file:
       - ./postgres/.env
     volumes:
@@ -58,5 +54,3 @@ services:
     image: redis
     expose:
       - 6379
-    ports:
-      - 6379:6379
