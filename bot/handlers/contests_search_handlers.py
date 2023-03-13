@@ -1,5 +1,6 @@
-from aiogram.dispatcher import FSMContext
 from aiogram import types
+from aiogram.dispatcher import FSMContext
+from loguru import logger
 
 from loader import dp, bot
 from utils import prepare_task_message
@@ -16,47 +17,71 @@ from keyboards.callback_data import *
 async def accept_contest_theme(query: types.CallbackQuery, 
                                state: FSMContext):
     query_data = query.data.split(':')
-    theme = query_data[1]
-    await state.update_data(theme=theme)
+    str_page_number = query_data[2]
     
-    difficulties = await get_difficulties()
-    await bot.send_message(query.from_user.id, 
-                           'Теперь введите уровень сложности заданий',
-                           reply_markup=get_all_items_keyboard(difficulty_data, 
-                                                               difficulties))
+
+    if str_page_number == 'None': #  touched theme
+        theme = query_data[1]
+        await state.update_data(theme=theme)
+        
+        difficulties = await get_difficulties()
+        await state.update_data(difficulties=difficulties)
+        await bot.send_message(query.from_user.id, 
+                            'Теперь введите уровень сложности заданий',
+                            reply_markup=get_all_items_keyboard(difficulty_data, 
+                                                                difficulties,
+                                                                current_page=1))
+        
+        await query.message.delete()
+        await ContestSettingState.contest_difficulty.set()
+        return
     
-    await query.message.delete()
-    await ContestSettingState.contest_difficulty.set()
+    page_number = int(str_page_number)
+    data = await state.get_data()
+    await query.message.edit_reply_markup(get_all_items_keyboard(theme_data, 
+                                                                 data['themes'],
+                                                                 current_page=page_number))
+    
+    await ContestSettingState.contest_theme.set()
     
 
 @dp.callback_query_handler(text_contains='difficulty_data',
                            state=ContestSettingState.contest_difficulty)
 async def accept_contest_difficulty(query: types.CallbackQuery, 
                                     state: FSMContext):
-    try:
-        query_data = query.data.split(':')
-        difficulty = int(query_data[1])
-    except ValueError:
-        await query.answer('Некорректная сложность!')
-        return
+    query_data = query.data.split(':')
+    str_page_number = query_data[2]
     
-    await state.update_data(difficulty=difficulty)
-    state_data = await state.get_data()
-    await state.finish()
-    
-    contests = await get_contests(state_data['theme'], state_data['difficulty'])
-    if len(contests) == 0:
-        await bot.send_message(query.from_user.id,
-                              'Не нашлось контестов по заданным параметрам')
+    if str_page_number == 'None': # touched difficulty
+        difficulty = int(query_data[1].strip())
+        
+        await state.update_data(difficulty=difficulty)
+        state_data = await state.get_data()
+        await state.finish()
+        
+        contests = await get_contests(state_data['theme'], 
+                                      state_data['difficulty'])
+        if len(contests) == 0:
+            await bot.send_message(query.from_user.id,
+                                   'Не нашлось контестов по заданным параметрам')
+            await query.message.delete()
+            return
+
+        await bot.send_message(query.from_user.id, 
+                               'Выберите один из предложенных контестов',
+                               reply_markup=get_all_items_keyboard(contest_data,
+                                                                   contests))    
         await query.message.delete()
         return
-
-    await bot.send_message(query.from_user.id, 
-                           'Выберите один из предложенных контестов',
-                           reply_markup=get_all_items_keyboard(contest_data,
-                                                               contests))    
-    await query.message.delete()
-
+    
+    page_number = int(str_page_number)
+    data = await state.get_data()
+    await query.message.edit_reply_markup(get_all_items_keyboard(difficulty_data, 
+                                                                 data['difficulties'],
+                                                                 current_page=page_number))
+    
+    await ContestSettingState.contest_difficulty.set()
+    
 
 @dp.callback_query_handler(text_contains='contest_data')
 async def get_contest_tasks(query: types.CallbackQuery):
@@ -77,4 +102,3 @@ async def get_task_data(query: types.CallbackQuery):
     task = await get_task(task_id)
     await bot.send_message(query.from_user.id,
                            prepare_task_message(task))
-    

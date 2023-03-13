@@ -1,4 +1,4 @@
 from aiogram.utils.callback_data import CallbackData
 
 
-difficulty_data = CallbackData('difficulty_data', 'id')
+difficulty_data = CallbackData('difficulty_data', 'id', 'page_number')

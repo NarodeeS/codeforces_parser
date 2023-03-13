@@ -1,5 +1,6 @@
-from aiogram.dispatcher.filters import Command
 from aiogram import types
+from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters import Command
 
 from loader import dp, bot
 from states.contest_settings_state import ContestSettingState
@@ -15,10 +16,15 @@ async def show_start_message(message: types.Message):
 
 
 @dp.message_handler(Command('contests'))
-async def start_contest_settings(message: types.Message):
+async def start_contest_settings(message: types.Message, state: FSMContext):
     themes = await get_themes()
+    
+    await state.update_data(themes=themes)
+    await state.update_data(current_page=1)
+    
     await bot.send_message(message.from_id,
                            'Выберите одну из тем',
                            reply_markup=get_all_items_keyboard(theme_data, 
-                                                               themes))
+                                                               themes,
+                                                               current_page=1))
     await ContestSettingState.contest_theme.set()
