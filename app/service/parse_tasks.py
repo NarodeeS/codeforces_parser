@@ -103,7 +103,7 @@ def parse_tasks() -> None:
     last_page = int(page_indexes_elements[-1].get('pageindex'))
     
     urls = []
-    for page_number in range(1, 4):
+    for page_number in range(1, last_page+1):
         urls.append(URL_TEMPLATE.format(page_number))
     
     results = map(_parse_page, urls)

@@ -14,6 +14,7 @@ class TaskBaseSchema(BaseModel):
     
 
 class ThemeSchema(BaseModel):
+    id: int
     description: str
     
     class Config:
@@ -21,6 +22,7 @@ class ThemeSchema(BaseModel):
     
 
 class DifficultySchema(BaseModel):
+    id: int
     value: int
     
     class Config:
