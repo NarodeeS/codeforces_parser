@@ -11,7 +11,7 @@ services:
     volumes:
       - "./bot/logs:/bot/logs"
     depends_on:
-      - api
+      - codeforces_api
     command: python3 app.py
   
   celery:
@@ -24,8 +24,8 @@ services:
       - ./app/logs:/app/logs
     command: celery -A celery_worker worker -B --loglevel=info -f logs/celery.log
 
-  api:
-    container_name: api
+  codeforces_api:
+    container_name: codeforces_api
     restart: unless-stopped
     build: ./app
     expose:

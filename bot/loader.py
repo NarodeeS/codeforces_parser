@@ -1,5 +1,6 @@
 import os
 
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram import Bot, Dispatcher
 
 
@@ -9,4 +10,5 @@ if not BOT_TOKEN:
 
 
 bot = Bot(BOT_TOKEN, parse_mode='HTML')
-dp = Dispatcher(bot=bot)
+storage = MemoryStorage()
+dp = Dispatcher(bot=bot, storage=storage)
