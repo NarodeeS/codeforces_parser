@@ -2,10 +2,6 @@ import os
 
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram import Bot, Dispatcher
-from loguru import logger
-
-
-logger.add('logs/info.log')
 
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
