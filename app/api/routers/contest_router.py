@@ -5,12 +5,14 @@ from ..schemas import ContestReturnSchema
 from ..get_db_session import get_db_session
 
 
-contest_router = APIRouter(prefix='/contests')
+contest_router = APIRouter(prefix='/contests', 
+                           tags=['contests'])
 
 
 @contest_router.get('/', 
                     response_model=list[ContestReturnSchema])
-def get_contests(theme: str, difficulty: int, db_session = Depends(get_db_session)):
+def get_contests(theme: str, difficulty: int, 
+                 db_session = Depends(get_db_session)):
     result = list(db_session.query(Contest)
                             .join(Theme)
                             .join(DifficultyClassifier)

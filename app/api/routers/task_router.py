@@ -1,12 +1,12 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 
-from db.base import Session
 from db.models import Task
 from ..schemas import TaskSchema
 from ..get_db_session import get_db_session
 
 
-task_router = APIRouter(prefix='/tasks')
+task_router = APIRouter(prefix='/tasks',
+                        tags=['tasks'])
 
 
 @task_router.get('/{id}', response_model=TaskSchema)
