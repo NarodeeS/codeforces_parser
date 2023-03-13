@@ -1,3 +1,4 @@
+import time
 from typing import TypeAlias
 
 import httpx
@@ -91,6 +92,8 @@ def _parse_page(url: str) -> ParseResult:
         
         except Exception as err:
             print(err)
+    
+    time.sleep(2)  #  small delay to bypass the vian
             
     return (tasks, task_themes)
 
