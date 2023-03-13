@@ -1,7 +1,7 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from schemas import ContestSchema
-from .contest_callback_data import contest_data
+from ..callback_data.contest_data import contest_data
 
 
 def get_contests_keyboard(contests: list[ContestSchema]) -> InlineKeyboardMarkup:
