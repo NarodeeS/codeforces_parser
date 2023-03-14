@@ -101,14 +101,11 @@ async def get_contest_tasks(query: types.CallbackQuery,
     if str_page_number == 'None':
         contest_id = int(query_data[1])
         contest = await get_contest(contest_id)
-        
-        await state.update_data(tasks=contest.tasks)
-        
+                
         await bot.send_message(query.from_user.id, 
                                'Выберите задание для просмотра подробностей',
                                reply_markup=get_all_items_keyboard(task_data, 
-                                                                   contest.tasks,
-                                                                   current_page=1))
+                                                                   contest.tasks))
         await query.message.delete()
         return
     
@@ -123,18 +120,9 @@ async def get_contest_tasks(query: types.CallbackQuery,
 async def get_task_data(query: types.CallbackQuery,
                         state: FSMContext):
     query_data = query.data.split(':')
-    str_page_number = query_data[2]
     
-    if str_page_number == 'None':
-        task_id = int(query_data[1])
-        task = await get_task(task_id)
-        await bot.send_message(query.from_user.id,
-                               prepare_task_message(task))
-        await state.finish()
-        return
-
-    page_number = int(str_page_number)
-    data = await state.get_data() 
-    await query.message.edit_reply_markup(get_all_items_keyboard(task_data, 
-                                                                 data['tasks'],
-                                                                 current_page=page_number))
+    task_id = int(query_data[1])
+    task = await get_task(task_id)
+    await bot.send_message(query.from_user.id,
+                            prepare_task_message(task))
+    await state.finish()
