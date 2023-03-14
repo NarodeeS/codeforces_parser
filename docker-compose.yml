@@ -3,7 +3,7 @@ version: "3.9"
 services:
   bot:
     container_name: bot
-    # restart: unless-stopped
+    restart: unless-stopped
     build: ./bot
     command: python app.py
     env_file:
